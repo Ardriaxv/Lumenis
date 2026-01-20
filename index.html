@@ -27,24 +27,24 @@
   --danger-dark: #b91c1c;
 }
 .gold-phi {
-  font-size: 60px;
-  font-weight: 900;
+  font-size: 58px;
+  font-weight: 300; /* thinner stroke */
+  letter-spacing: 1px;
+
   background: linear-gradient(
-    45deg,
-    #b8860b,
-    #ffd700,
-    #fff8dc,
-    #ffd700,
-    #b8860b
+    135deg,
+    #f7e9b5 0%,
+    #d4af37 25%,
+    #b8860b 50%,
+    #f7e9b5 75%,
+    #d4af37 100%
   );
   -webkit-background-clip: text;
   color: transparent;
-  text-shadow:
-    0 0 5px rgba(255, 215, 0, 0.6),
-    0 0 10px rgba(255, 215, 0, 0.4),
-    0 0 15px rgba(255, 215, 0, 0.2);
-}
 
+  text-shadow:
+    0 0 3px rgba(255, 215, 0, 0.4),
+    0 0 6px rgba(255, 215, 0, 0.2);
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -1463,6 +1463,7 @@ if (!localStorage.getItem(TONE_KEY)) {
 </script>
 </body>
 </html>
+
 
 
 
