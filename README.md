@@ -48,7 +48,7 @@ Emotional state selector
 
 Notes section
 
-One‑tap save
+One tap save
 
 Timeline View
 Review all past entries
@@ -76,7 +76,7 @@ Labels
 
 UI feel
 
-Local‑Only Data
+Local Only Data
 Everything is stored in your browser’s localStorage.
 You can clear it at any time.
 
