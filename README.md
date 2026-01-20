@@ -11,7 +11,7 @@ Lumenis offers a simple, intuitive way to explore your emotional state:
 
 Adjust five core metrics (exploration, introspection, stability, connection, memory)
 
-Watch a real time harmonic field respond to your inputs
+Watch a real time harmonic field respond to your inputs over time.
 
 Choose your emotional state from a curated set
 
