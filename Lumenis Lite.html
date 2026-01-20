@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lumenis Emotional Wellness Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      background: linear-gradient(to right, #fda4af, #c4b5fd, #fcd34d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .subtitle { text-align: center; color: #cbd5e1; margin-bottom: 30px; }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .tab {
+      padding: 10px 24px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #cbd5e1;
+      user-select: none;
+    }
+
+    .tab.active {
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border-color: transparent;
+      color: white;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .harmonic-viz {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .field {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(20px);
+    }
+
+    .slider-group { margin-bottom: 20px; }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      cursor: pointer;
+      border: none;
+    }
+
+    .state-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 20px 0;
+    }
+
+    .state-btn {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+    }
+
+    .state-btn.active {
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border-color: transparent;
+      color: white;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: white;
+      resize: vertical;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .btn:hover { transform: scale(1.03); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+
+    .btn:active { transform: scale(0.98); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+
+    .entry-card {
+      background: rgba(15,23,42,0.7);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 4px solid #a78bfa;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 20px;
+      background: rgba(15,23,42,0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.5);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      font-size: 0.875rem;
+    }
+
+    .hidden { display: none; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.7);
+      color: #e2e8f0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.15);
+      color: #cbd5e1;
+      font-size: 0.7rem;
+      margin-right: 4px;
+      margin-top: 4px;
+    }
+
+    .small-label {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lumenis</h1>
+    <p class="subtitle">Emotional wellness through harmonic resonance</p>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">Dashboard</div>
+      <div class="tab" data-tab="checkin">Check-In</div>
+      <div class="tab" data-tab="timeline">Timeline</div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="tab-content">
+      <div class="card">
+        <h2 style="text-align: center; margin-bottom: 20px;">Current Harmonic State</h2>
+        <div id="current-viz" class="harmonic-viz"></div>
+        <div id="current-state" style="text-align: center; margin-top: 20px; font-size: 1.5rem;"></div>
+        <div id="current-date" style="text-align:center; margin-top: 4px; font-size: 0.9rem; color:#cbd5e1;"></div>
+      </div>
+
+      <div class="grid" id="stats-grid"></div>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div id="checkin" class="tab-content hidden">
+      <div class="card">
+        <h2 style="margin-bottom: 20px;">Daily Check-In</h2>
+
+        <!-- Live preview -->
+        <div id="live-preview" class="card" style="background: rgba(15,23,42,0.8); margin-bottom: 24px;">
+          <h3 style="text-align: center; margin-bottom: 15px;">Live Harmonic Preview</h3>
+          <div class="harmonic-viz" id="preview-viz"></div>
+          <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+            <div style="text-align: center;">
+              <div class="small-label">Coherence</div>
+              <div id="preview-coherence" style="font-size: 1.5rem; font-weight: bold; color: #a78bfa;">0%</div>
+            </div>
+            <div style="text-align: center;">
+              <div class="small-label">Quality</div>
+              <div id="preview-quality" style="font-size: 1.5rem; font-weight: bold; color: #818cf8;">0%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sliders -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Exploration Drive</label>
+            <span id="exploration-val">50%</span>
+          </div>
+          <input type="range" class="slider" id="exploration" min="0" max="100" value="50" />
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Introspection Drive</label>
+            <span id="introspection-val">50%</span>
+          </div>
+          <input type="range" class="slider" id="introspection" min="0" max="100" value="50" />
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Stability</label>
+            <span id="stability-val">50%</span>
+          </div>
+          <input type="range" class="slider" id="stability" min="0" max="100" value="50" />
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Bond Strength</label>
+            <span id="bond-val">50%</span>
+          </div>
+          <input type="range" class="slider" id="bond" min="0" max="100" value="50" />
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <label>Memory Intensity</label>
+            <span id="memory-val">50%</span>
+          </div>
+          <input type="range" class="slider" id="memory" min="0" max="100" value="50" />
+        </div>
+
+        <!-- Emotional state buttons -->
+        <h3 style="margin: 20px 0 10px;">Emotional State</h3>
+        <div class="state-buttons" id="state-buttons"></div>
+
+        <!-- Triggers (simple tags) -->
+        <h3 style="margin: 20px 0 10px;">What influenced this?</h3>
+        <input
+          id="trigger-input"
+          type="text"
+          placeholder="Type a word or phrase and press Enter..."
+          style="width:100%; padding:8px; border-radius:8px; border:1px solid rgba(148,163,184,0.5); background:rgba(15,23,42,0.8); color:#e2e8f0; margin-bottom:8px;"
+        />
+        <div id="trigger-tags"></div>
+
+        <!-- Notes -->
+        <h3 style="margin: 20px 0 10px;">Reflections</h3>
+        <textarea id="notes" placeholder="What's on your mind?"></textarea>
+
+        <button class="btn" style="margin-top: 20px; width: 100%;" id="save-btn">
+          Save Check-In
+        </button>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="timeline" class="tab-content hidden">
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="flex-row">
+          <h2>Emotional Timeline</h2>
+          <div>
+            <span class="small-label">Range</span>
+            <select id="range-select" style="padding:6px 10px; border-radius:8px; border:1px solid rgba(148,163,184,0.7); background:rgba(15,23,42,0.9); color:#e2e8f0;">
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+              <option value="90">90 days</option>
+              <option value="365">1 year</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid" id="entries-grid"></div>
+    </div>
+
+    <footer>
+      <p>© <span id="year"></span> D. Hughson. All rights reserved. Lumenis is a personal reflection tool, not medical advice.</p>
+      <p style="font-size: 0.75rem; margin-top: 5px; color: #64748b;">
+        Based on the Quasion–XION Harmonic Identity Model
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // ---------- DATA & MODEL ----------
+
+    const states = [
+      "Curiosity",
+      "Wonder",
+      "Joy",
+      "Empathy",
+      "Grief",
+      "Compassion",
+      "Love",
+      "Harmony",
+      "Longing",
+      "Peace"
+    ];
+
+    let currentState = "Peace";
+    let currentTriggers = [];
+
+    const clamp01 = (x) => Math.max(0, Math.min(1, x));
+
+    function calculateHarmonicsFromRaw(data) {
+      const E = data.exploration / 100;
+      const bond = data.bond / 100;
+      const memory = data.memory / 100;
+
+      const resonance = 0.7;
+      const sensory = 0.6;
+      const echo = 0.65;
+
+      const love = E * resonance * memory * sensory * echo * bond;
+      const grief = (1 - E) * resonance * memory * sensory * echo * (1 - bond);
+      const longing = love * grief;
+
+      let coherence =
+        0.5 +
+        0.04 * (E - 0.5) +
+        0.02 * love -
+        0.01 * grief +
+        0.02 * longing;
+      coherence = clamp01(coherence);
+
+      let quality =
+        0.3 * coherence +
+        0.3 * love +
+        0.2 * (1 - grief) +
+        0.2 * longing;
+      quality = clamp01(quality);
+
+      return {
+        love,
+        grief,
+        longing,
+        coherence,
+        quality
+      };
+    }
+
+    let entries = [];
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem("harmonia-entries");
+        entries = raw ? JSON.parse(raw) : [];
+      } catch {
+        entries = [];
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem("harmonia-entries", JSON.stringify(entries));
+    }
+
+    // ---------- UI HELPERS ----------
+
+    function renderHarmonicViz(elementId, love, grief, longing) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.innerHTML = `
+        <div class="field" style="
+          width: 100%; height: 100%; top: 0; left: 0;
+          background: radial-gradient(circle, rgba(251,113,133,${0.3 +
+            love * 0.5}) 0%, transparent 70%);
+        "></div>
+        <div class="field" style="
+          width: 70%; height: 70%; top: 15%; left: 15%;
+          background: radial-gradient(circle, rgba(100,116,139,${0.3 +
+            grief * 0.5}) 0%, transparent 70%);
+        "></div>
+        <div class="field" style="
+          width: 40%; height: 40%; top: 30%; left: 30%;
+          background: radial-gradient(circle, rgba(251,191,36,${longing}) 0%, transparent 100%);
+        "></div>
+      `;
+    }
+
+    function updatePreview() {
+      const exploration = parseInt(document.getElementById("exploration").value, 10);
+      const introspection = parseInt(document.getElementById("introspection").value, 10);
+      const stability = parseInt(document.getElementById("stability").value, 10);
+      const bond = parseInt(document.getElementById("bond").value, 10);
+      const memory = parseInt(document.getElementById("memory").value, 10);
+
+      document.getElementById("exploration-val").textContent = exploration + "%";
+      document.getElementById("introspection-val").textContent = introspection + "%";
+      document.getElementById("stability-val").textContent = stability + "%";
+      document.getElementById("bond-val").textContent = bond + "%";
+      document.getElementById("memory-val").textContent = memory + "%";
+
+      const harmonics = calculateHarmonicsFromRaw({
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory
+      });
+
+      renderHarmonicViz("preview-viz", harmonics.love, harmonics.grief, harmonics.longing);
+      document.getElementById("preview-coherence").textContent =
+        Math.round(harmonics.coherence * 100) + "%";
+      document.getElementById("preview-quality").textContent =
+        Math.round(harmonics.quality * 100) + "%";
+    }
+
+    // ---------- SAVE CHECK-IN ----------
+
+    function saveCheckIn() {
+      const exploration = parseInt(document.getElementById("exploration").value, 10);
+      const introspection = parseInt(document.getElementById("introspection").value, 10);
+      const stability = parseInt(document.getElementById("stability").value, 10);
+      const bond = parseInt(document.getElementById("bond").value, 10);
+      const memory = parseInt(document.getElementById("memory").value, 10);
+      const notes = document.getElementById("notes").value || "";
+
+      const harmonics = calculateHarmonicsFromRaw({
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory
+      });
+
+      const entry = {
+        date: new Date().toISOString(),
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory,
+        state: currentState,
+        notes,
+        triggers: [...currentTriggers],
+        love: harmonics.love,
+        grief: harmonics.grief,
+        longing: harmonics.longing,
+        coherence: harmonics.coherence,
+        quality: harmonics.quality
+      };
+
+      entries.unshift(entry);
+      saveEntries();
+      alert("Check-in saved.");
+      currentTriggers = [];
+      document.getElementById("trigger-tags").innerHTML = "";
+      document.getElementById("notes").value = "";
+      document.getElementById("exploration").value = 50;
+      document.getElementById("introspection").value = 50;
+      document.getElementById("stability").value = 50;
+      document.getElementById("bond").value = 50;
+      document.getElementById("memory").value = 50;
+      updatePreview();
+      showTab("dashboard");
+      loadDashboard();
+    }
+
+    // ---------- TABS ----------
+
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.getAttribute("data-tab") === tabId);
+      });
+      document.querySelectorAll(".tab-content").forEach((c) => {
+        c.classList.toggle("hidden", c.id !== tabId);
+      });
+
+      if (tabId === "dashboard") {
+        loadDashboard();
+      } else if (tabId === "timeline") {
+        loadTimeline();
+      }
+    }
+
+    // ---------- DASHBOARD RENDER ----------
+
+    function loadDashboard() {
+      const viz = document.getElementById("current-viz");
+      const stateEl = document.getElementById("current-state");
+      const dateEl = document.getElementById("current-date");
+      const statsGrid = document.getElementById("stats-grid");
+
+      if (!entries.length) {
+        viz.innerHTML = '<p style="text-align:center;">No entries yet</p>';
+        stateEl.textContent = "Start your journey";
+        dateEl.textContent = "";
+        statsGrid.innerHTML = "";
+        return;
+      }
+
+      const latest = entries[0];
+      renderHarmonicViz("current-viz", latest.love, latest.grief, latest.longing);
+      stateEl.textContent = latest.state;
+
+      const date = new Date(latest.date);
+      dateEl.textContent = date.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+      const avgLove =
+        entries.reduce((s, e) => s + e.love, 0) / entries.length;
+      const avgGrief =
+        entries.reduce((s, e) => s + e.grief, 0) / entries.length;
+      const avgCoherence =
+        entries.reduce((s, e) => s + e.coherence, 0) / entries.length;
+      const avgQuality =
+        entries.reduce((s, e) => s + e.quality, 0) / entries.length;
+
+      statsGrid.innerHTML = `
+        <div class="stat">
+          <div style="color:#fb7185;">Love Field</div>
+          <div class="stat-value" style="color:#fb7185;">${Math.round(
+            avgLove * 100
+          )}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#94a3b8;">Grief Field</div>
+          <div class="stat-value" style="color:#94a3b8;">${Math.round(
+            avgGrief * 100
+          )}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#fbbf24;">Longing Field</div>
+          <div class="stat-value" style="color:#fbbf24;">${Math.round(
+            avgLove * avgGrief * 100
+          )}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#a78bfa;">Coherence</div>
+          <div class="stat-value" style="color:#a78bfa;">${Math.round(
+            avgCoherence * 100
+          )}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#38bdf8;">Quality Index</div>
+          <div class="stat-value" style="color:#38bdf8;">${Math.round(
+            avgQuality * 100
+          )}%</div>
+        </div>
+      `;
+    }
+
+    // ---------- TIMELINE RENDER ----------
+
+    function loadTimeline() {
+      const grid = document.getElementById("entries-grid");
+      const rangeSelect = document.getElementById("range-select");
+      const days = parseInt(rangeSelect.value, 10);
+
+      if (!entries.length) {
+        grid.innerHTML =
+          '<div class="card"><p style="text-align:center;">No entries yet. Create your first check-in!</p></div>';
+        return;
+      }
+
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+
+      const filtered = entries.filter((e) => new Date(e.date) >= cutoff);
+
+      if (!filtered.length) {
+        grid.innerHTML =
+          '<div class="card"><p style="text-align:center;">No entries in this range.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map((e) => {
+          const date = new Date(e.date).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          });
+
+          const triggers = (e.triggers || [])
+            .map((t) => `<span class="tag">${t}</span>`)
+            .join("");
+
+          return `
+            <div class="entry-card">
+              <div class="flex-row">
+                <div>
+                  <div style="font-weight:bold; font-size:1rem;">${e.state}</div>
+                  <div style="font-size:0.8rem; color:#9ca3af;">${date}</div>
+                </div>
+                <div class="pill">
+                  Coherence&nbsp;<strong>${Math.round(e.coherence * 100)}%</strong>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.8rem;">
+                <span>Love: <strong>${Math.round(e.love * 100)}%</strong></span>
+                <span>Grief: <strong>${Math.round(e.grief * 100)}%</strong></span>
+                <span>Longing: <strong>${Math.round(e.longing * 100)}%</strong></span>
+              </div>
+
+              <div style="margin-top:8px; font-size:0.8rem;">
+                <span class="small-label">Quality Index</span>
+                <span>${Math.round(e.quality * 100)}%</span>
+              </div>
+
+              ${
+                triggers
+                  ? `<div style="margin-top:8px;"><span class="small-label">Triggers</span>${triggers}</div>`
+                  : ""
+              }
+
+              ${
+                e.notes
+                  ? `<p style="margin-top:12px; font-style:italic; color:#cbd5e1; font-size:0.85rem;">"${e.notes}"</p>`
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    // ---------- INITIALIZE UI ----------
+
+    function initStateButtons() {
+      const container = document.getElementById("state-buttons");
+      container.innerHTML = states
+        .map(
+          (s) => `
+        <div
+          class="state-btn ${s === currentState ? "active" : ""}"
+          data-state="${s}"
+        >${s}</div>
+      `
+        )
+        .join("");
+
+      container.addEventListener("click", (e) => {
+        const btn = e.target.closest(".state-btn");
+        if (!btn) return;
+        currentState = btn.getAttribute("data-state");
+        document
+          .querySelectorAll(".state-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    }
+
+    function initTriggers() {
+      const input = document.getElementById("trigger-input");
+      const tagsContainer = document.getElementById("trigger-tags");
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const val = input.value.trim();
+          if (!val) return;
+          currentTriggers.push(val);
+          input.value = "";
+          renderTriggerTags();
+        }
+      });
+
+      function renderTriggerTags() {
+        tagsContainer.innerHTML = currentTriggers
+          .map(
+            (t, index) => `
+          <span class="tag" data-index="${index}">
+            ${t} &times;
+          </span>
+        `
+          )
+          .join("");
+
+        tagsContainer.querySelectorAll(".tag").forEach((tagEl) => {
+          tagEl.addEventListener("click", () => {
+            const idx = parseInt(tagEl.getAttribute("data-index"), 10);
+            currentTriggers.splice(idx, 1);
+            renderTriggerTags();
+          });
+        });
+      }
+    }
+
+    function initTabs() {
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const id = tab.getAttribute("data-tab");
+          showTab(id);
+        });
+      });
+    }
+
+    function initSliders() {
+      ["exploration", "introspection", "stability", "bond", "memory"].forEach(
+        (id) => {
+          const el = document.getElementById(id);
+          el.addEventListener("input", updatePreview);
+        }
+      );
+    }
+
+    function initRangeSelect() {
+      const select = document.getElementById("range-select");
+      select.addEventListener("change", loadTimeline);
+    }
+
+    function initSaveButton() {
+      document.getElementById("save-btn").addEventListener("click", saveCheckIn);
+    }
+
+    // ---------- BOOTSTRAP ----------
+
+    document.getElementById("year").textContent =
+      new Date().getFullYear().toString();
+
+    loadEntries();
+    initTabs();
+    initStateButtons();
+    initTriggers();
+    initSliders();
+    initRangeSelect();
+    initSaveButton();
+    updatePreview();
+    loadDashboard();
+  </script>
+</body>
+</html>

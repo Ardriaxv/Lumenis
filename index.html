@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Harmonia - Emotional Wellness Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0f172a;
+  --bg-card: rgba(15, 23, 42, 0.8);
+  --bg-card-soft: rgba(15, 23, 42, 0.6);
+  --border-soft: rgba(148,163,184,0.4);
+  --accent: #818cf8;
+  --accent-soft: rgba(129,140,248,0.25);
+  --text: #e2e8f0;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --love: #fb7185;
+  --grief: #94a3b8;
+  --longing: #fbbf24;
+  --coherence: #a78bfa;
+  --quality: #38bdf8;
+  --danger: #ef4444;
+  --danger-dark: #b91c1c;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, #1e293b 0%, var(--bg) 45%, #020617 100%);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+h1 {
+  text-align: center;
+  font-size: 3rem;
+  background: linear-gradient(to right, #fda4af, #c4b5fd, #fcd34d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.subtitle { text-align: center; color: var(--text-soft); margin-bottom: 30px; }
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 10px 24px;
+  background: rgba(15,23,42,0.7);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s;
+  color: var(--text-soft);
+  user-select: none;
+  font-size: 0.95rem;
+}
+
+.tab:hover { background: rgba(15,23,42,0.9); }
+
+.tab.active {
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 8px 20px rgba(15,23,42,0.6);
+}
+
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.soft-card {
+  background: var(--bg-card-soft);
+  border: 1px solid rgba(148,163,184,0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Harmonic viz */
+.harmonic-viz {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  position: relative;
+}
+.field {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(20px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.love-field {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: radial-gradient(circle, rgba(251,113,133,0.5) 0%, transparent 70%);
+}
+.grief-field {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+  background: radial-gradient(circle, rgba(100,116,139,0.5) 0%, transparent 70%);
+}
+.longing-field {
+  width: 40%;
+  height: 40%;
+  top: 30%;
+  left: 30%;
+  background: radial-gradient(circle, rgba(251,191,36,0.7) 0%, transparent 100%);
+}
+.center-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+/* Sliders */
+.slider-group { margin-bottom: 20px; }
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+.slider-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  outline: none;
+  -webkit-appearance: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(129,140,248,0.35);
+}
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 4px rgba(129,140,248,0.35);
+}
+
+/* Emotion state buttons */
+.state-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+}
+.state-btn {
+  padding: 8px 16px;
+  background: rgba(15,23,42,0.8);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+.state-btn:hover { background: rgba(15,23,42,0.95); }
+.state-btn.active {
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.7);
+}
+
+/* Textarea & buttons */
+textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  background: rgba(15,23,42,0.9);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  color: var(--text);
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+textarea::placeholder { color: var(--text-muted); }
+
+.btn {
+  padding: 10px 22px;
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(15,23,42,0.6);
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(15,23,42,0.75); }
+.btn:active { transform: translateY(1px) scale(0.98); box-shadow: 0 6px 16px rgba(15,23,42,0.7); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  box-shadow: none;
+  color: var(--text-soft);
+}
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+/* Entries, stats, layout */
+.entry-card {
+  background: rgba(15,23,42,0.9);
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+  border-top: 1px solid rgba(148,163,184,0.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.stat {
+  text-align: center;
+  padding: 20px;
+  background: rgba(15,23,42,0.85);
+  border-radius: 10px;
+  border: 1px solid rgba(148,163,184,0.4);
+}
+.stat-label { font-size: 0.875rem; color: var(--text-soft); }
+.stat-value { font-size: 2rem; font-weight: bold; margin: 8px 0; }
+
+.progress-bar {
+  height: 8px;
+  background: rgba(30,41,59,0.9);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-fill {
+  height: 100%;
+  transition: width 1s ease;
+}
+
+footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(148,163,184,0.3);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.hidden { display: none; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-soft);
+}
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(15,23,42,0.8);
+  border: 1px solid rgba(148,163,184,0.7);
+  color: var(--text);
+  gap: 4px;
+}
+
+.small-label {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(148,163,184,0.15);
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  margin-right: 4px;
+  margin-top: 4px;
+}
+
+/* Tone chips */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tone-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: rgba(15,23,42,0.8);
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  transition: all 0.18s;
+}
+.tone-chip:hover { background: rgba(15,23,42,0.95); }
+.tone-chip.active {
+  background: linear-gradient(to right, var(--accent), #a855f7);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.8);
+}
+
+.muted {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  background: rgba(15,23,42,0.9);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Onboarding overlay */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(2,6,23,0.98));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.onboarding-card {
+  max-width: 520px;
+  width: 100%;
+  margin: 16px;
+  background: rgba(15,23,42,0.98);
+  border-radius: 16px;
+  border: 1px solid rgba(148,163,184,0.5);
+  padding: 24px 22px 18px 22px;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.95);
+}
+.onboarding-title {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.onboarding-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  text-align: center;
+  margin-bottom: 18px;
+}
+.tone-description {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,0.6);
+  color: var(--text-soft);
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 2rem; }
+  .grid { grid-template-columns: 1fr; }
+  .tabs { gap: 6px; }
+  .tab { padding-inline: 14px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>Lumenis</h1>
+  <p class="subtitle">Emotional wellness tracker</p>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="dashboard" onclick="showTab('dashboard', this)">Dashboard</div>
+    <div class="tab" data-tab="checkin" onclick="showTab('checkin', this)">Check-In</div>
+    <div class="tab" data-tab="timeline" onclick="showTab('timeline', this)">Timeline</div>
+    <div class="tab" data-tab="settings" onclick="showTab('settings', this)">Style & Safety</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="tab-content">
+    <div id="dashboard-content"></div>
+  </div>
+
+  <!-- Check-In -->
+  <div id="checkin" class="tab-content hidden">
+    <div class="card">
+      <h2 id="checkin-title" style="margin-bottom: 16px;">Daily Check-In</h2>
+
+      <div class="soft-card">
+        <div class="flex-row" style="margin-bottom: 10px;">
+          <h3 style="font-size:1rem;">Live Harmonic Preview</h3>
+          <span class="badge">
+            <span style="width:8px;height:8px;border-radius:999px;background:#22c55e;"></span>
+            Real-time
+          </span>
+        </div>
+
+        <div class="harmonic-viz" id="preview-viz">
+          <div class="field love-field"></div>
+          <div class="field grief-field"></div>
+          <div class="field longing-field"></div>
+          <div class="center-dot"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-around; margin-top: 20px; gap: 20px; flex-wrap: wrap;">
+          <div style="text-align: center; flex: 1; min-width: 100px;">
+            <div id="preview-coherence-label" style="font-size: 0.8rem; color: var(--text-soft);">Coherence</div>
+            <div id="preview-coherence" style="font-size: 1.5rem; font-weight: bold; color: var(--coherence);">50%</div>
+          </div>
+          <div style="text-align: center; flex: 1; min-width: 100px;">
+            <div id="preview-quality-label" style="font-size: 0.8rem; color: var(--text-soft);">Quality</div>
+            <div id="preview-quality" style="font-size: 1.5rem; font-weight: bold; color: var(--quality);">50%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="slider-group">
+        <div class="slider-header">
+          <label id="label-exploration">Exploration Drive</label>
+          <span id="exploration-val">50%</span>
+        </div>
+        <input type="range" class="slider" id="exploration" min="0" max="100" value="50" />
+        <div class="slider-desc" id="desc-exploration">
+          How curious and engaged with the world do you feel?
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label id="label-introspection">Introspection Drive</label>
+          <span id="introspection-val">50%</span>
+        </div>
+        <input type="range" class="slider" id="introspection" min="0" max="100" value="50" />
+        <div class="slider-desc" id="desc-introspection">
+          How much are you reflecting inward today?
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label id="label-stability">Stability</label>
+          <span id="stability-val">50%</span>
+        </div>
+        <input type="range" class="slider" id="stability" min="0" max="100" value="50" />
+        <div class="slider-desc" id="desc-stability">
+          How grounded and stable do you feel?
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label id="label-bond">Bond Strength</label>
+          <span id="bond-val">50%</span>
+        </div>
+        <input type="range" class="slider" id="bond" min="0" max="100" value="50" />
+        <div class="slider-desc" id="desc-bond">
+          How strong do your close connections feel today?
+        </div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label id="label-memory">Memory Intensity</label>
+          <span id="memory-val">50%</span>
+        </div>
+        <input type="range" class="slider" id="memory" min="0" max="100" value="50" />
+        <div class="slider-desc" id="desc-memory">
+          How present are memories in your awareness today?
+        </div>
+      </div>
+
+      <!-- Emotional state -->
+      <h3 style="margin: 20px 0 10px;" id="state-heading">Emotional State</h3>
+      <div class="state-buttons" id="state-buttons"></div>
+
+      <!-- Notes -->
+      <h3 style="margin: 20px 0 10px;" id="notes-heading">Reflections</h3>
+      <textarea id="notes" placeholder="What's on your mind? Any feelings or experiences you'd like to capture..."></textarea>
+
+      <button class="btn" onclick="saveCheckIn()" style="margin-top: 20px; width: 100%;">Save Check-In</button>
+
+      <p class="muted" style="margin-top: 10px;">
+        This tool is for self reflection and personal tracking only. If you feel overwhelmed, consider reaching out
+        to someone you trust or a professional for support.
+      </p>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div id="timeline" class="tab-content hidden">
+    <div id="timeline-content"></div>
+  </div>
+
+  <!-- Settings / Style & Safety -->
+  <div id="settings" class="tab-content hidden">
+    <div class="card">
+      <h2 style="margin-bottom: 10px;">Style & Tone</h2>
+      <p class="muted" style="margin-bottom: 16px;">
+        Choose how Harmonia speaks to you. This doesn't change the model, only the language and visual style.
+      </p>
+
+      <div class="chip-group" id="tone-chips">
+        <!-- Populated by JS -->
+      </div>
+
+      <div id="custom-tone-section" class="soft-card hidden" style="margin-top: 16px;">
+        <h3 style="font-size:1rem; margin-bottom: 8px;">Custom Style</h3>
+        <p class="muted" style="margin-bottom: 10px;">
+          Set your own accent color and optional labels. Leave fields empty to use defaults.
+        </p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <span class="small-label">Accent Color (hex)</span>
+            <input id="custom-accent" class="input" placeholder="#a855f7" />
+          </div>
+          <div>
+            <span class="small-label">Background Color (hex)</span>
+            <input id="custom-bg" class="input" placeholder="#0f172a" />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <span class="small-label">Coherence label</span>
+            <input id="custom-coherence-label" class="input" placeholder="Coherence" />
+          </div>
+          <div>
+            <span class="small-label">Quality label</span>
+            <input id="custom-quality-label" class="input" placeholder="Quality Index" />
+          </div>
+        </div>
+
+        <button class="btn" onclick="saveCustomTone()" style="margin-top: 6px;">Apply Custom Style</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom: 10px;">Data & Safety</h2>
+      <p class="muted" style="margin-bottom: 12px;">
+        Your data is stored only on this device using your browser's local storage. You can clear it interanly by resetting it at any time.
+      </p>
+
+      
+
+  <footer>
+    <p>© <span id="year"></span> D. Hughson. All rights reserved. Lumenis is a personal reflection tool, not medical advice.</p>
+    <p style="font-size: 0.75rem; margin-top: 5px; color: var(--text-muted);">
+      Based on the Quasion XION Harmonic Identity Model
+    </p>
+  </footer>
+</div>
+
+<!-- Onboarding Tone Selector -->
+<div id="onboarding-overlay" class="onboarding-overlay hidden">
+  <div class="onboarding-card">
+    <div class="badge" style="margin-bottom:8px;">
+      <span style="width:8px;height:8px;border-radius:999px;background:#22c55e;"></span>
+      First-time setup
+    </div>
+
+    <h2 class="onboarding-title">Choose Your Lumenis Style</h2>
+    <p class="onboarding-subtitle">
+      How would you like Harmonia to speak to you? This affects tone and visuals, not who you are.
+    </p>
+
+    <div class="soft-card" style="margin-bottom:12px;">
+      <div class="chip-group">
+        <div class="tone-chip" data-tone="structured" onclick="selectToneFromOnboarding('structured', this)">
+          Structured Mode
+          <div class="tone-description">Direct, grounded, minimal.</div>
+        </div>
+        <div class="tone-chip" data-tone="expressive" onclick="selectToneFromOnboarding('expressive', this)">
+          Expressive Mode
+          <div class="tone-description">Warm, intuitive, fluid.</div>
+        </div>
+        <div class="tone-chip active" data-tone="balanced" onclick="selectToneFromOnboarding('balanced', this)">
+          Balanced Mode
+          <div class="tone-description">Clean, neutral, universal.</div>
+        </div>
+        <div class="tone-chip" data-tone="custom" onclick="selectToneFromOnboarding('custom', this)">
+          Custom Mode
+          <div class="tone-description">Define your own colors and labels.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-bottom: 10px;">
+      Anyone can choose any mode. It's simply your style preference.
+    </p>
+
+    <div class="flex-row">
+      <button class="btn-ghost btn" onclick="dismissOnboarding()">Skip for now</button>
+      <button class="btn" onclick="confirmOnboardingTone()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ------------------------- STATE & CONSTANTS -------------------------
+const STATES = [
+  "Curiosity",
+  "Wonder",
+  "Joy",
+  "Empathy",
+  "Grief",
+  "Compassion",
+  "Love",
+  "Harmony",
+  "Longing",
+  "Peace"
+];
+
+const STATE_COLORS = {
+  Curiosity: "#60a5fa",
+  Wonder: "#a78bfa",
+  Joy: "#fbbf24",
+  Empathy: "#34d399",
+  Grief: "#94a3b8",
+  Compassion: "#14b8a6",
+  Love: "#fb7185",
+  Harmony: "#818cf8",
+  Longing: "#f59e0b",
+  Peace: "#10b981"
+};
+
+const TONE_KEY = "harmonia-tone";
+const TONE_CUSTOM_KEY = "harmonia-tone-custom";
+const ENTRIES_KEY = "harmonia-entries";
+
+let currentState = "Peace";
+let entries = JSON.parse(localStorage.getItem(ENTRIES_KEY) || "[]");
+let selectedTone = localStorage.getItem(TONE_KEY) || "balanced";
+
+// ------------------------- TONE CONFIG -------------------------
+const toneConfigs = {
+  structured: {
+    palette: {
+      bg: "#020617",
+      bgCard: "rgba(15,23,42,0.96)",
+      bgCardSoft: "rgba(15,23,42,0.8)",
+      borderSoft: "rgba(148,163,184,0.5)",
+      accent: "#fbbf24",
+      accentSoft: "rgba(251,191,36,0.3)",
+      text: "#e5e7eb",
+      textSoft: "#cbd5e1",
+      textMuted: "#9ca3af",
+      love: "#fb7185",
+      grief: "#64748b",
+      longing: "#f59e0b",
+      coherence: "#eab308",
+      quality: "#38bdf8",
+      danger: "#ef4444",
+      dangerDark: "#b91c1c"
+    },
+    labels: {
+      checkinTitle: "Status Update",
+      stateHeading: "Current State",
+      notesHeading: "Notes / Debrief",
+      coherence: "Alignment Score",
+      quality: "Resilience Index",
+      exploration: "Exploration",
+      introspection: "Introspection",
+      stability: "Stability",
+      bond: "Bond Strength",
+      memory: "Memory Load"
+    }
+  },
+  expressive: {
+    palette: {
+      bg: "#0f172a",
+      bgCard: "rgba(15,23,42,0.92)",
+      bgCardSoft: "rgba(15,23,42,0.8)",
+      borderSoft: "rgba(148,163,184,0.5)",
+      accent: "#f472b6",
+      accentSoft: "rgba(244,114,182,0.35)",
+      text: "#f9fafb",
+      textSoft: "#e5e7eb",
+      textMuted: "#cbd5e1",
+      love: "#fb7185",
+      grief: "#94a3b8",
+      longing: "#fcd34d",
+      coherence: "#c4b5fd",
+      quality: "#38bdf8",
+      danger: "#ef4444",
+      dangerDark: "#b91c1c"
+    },
+    labels: {
+      checkinTitle: "Daily Check-In",
+      stateHeading: "Emotional State",
+      notesHeading: "Reflections",
+      coherence: "Coherence",
+      quality: "Quality Index",
+      exploration: "Exploration Drive",
+      introspection: "Introspection Drive",
+      stability: "Stability",
+      bond: "Bond Strength",
+      memory: "Memory Intensity"
+    }
+  },
+  balanced: {
+    palette: {
+      bg: "#020617",
+      bgCard: "rgba(15,23,42,0.94)",
+      bgCardSoft: "rgba(15,23,42,0.8)",
+      borderSoft: "rgba(148,163,184,0.45)",
+      accent: "#818cf8",
+      accentSoft: "rgba(129,140,248,0.35)",
+      text: "#e2e8f0",
+      textSoft: "#cbd5e1",
+      textMuted: "#94a3b8",
+      love: "#fb7185",
+      grief: "#94a3b8",
+      longing: "#fbbf24",
+      coherence: "#a78bfa",
+      quality: "#38bdf8",
+      danger: "#ef4444",
+      dangerDark: "#b91c1c"
+    },
+    labels: {
+      checkinTitle: "Entry",
+      stateHeading: "Current Emotional Pattern",
+      notesHeading: "Notes",
+      coherence: "Balance Score",
+      quality: "Wellbeing Index",
+      exploration: "Exploration",
+      introspection: "Introspection",
+      stability: "Stability",
+      bond: "Connection Strength",
+      memory: "Memory Presence"
+    }
+  }
+};
+
+function getCustomToneConfig() {
+  const raw = localStorage.getItem(TONE_CUSTOM_KEY);
+  if (!raw) return null;
+  try {
+    const data = JSON.parse(raw);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function applyTone(toneName) {
+  let config;
+  if (toneName === "custom") {
+    const custom = getCustomToneConfig();
+    config = custom && custom.palette && custom.labels
+      ? custom
+      : { palette: toneConfigs.balanced.palette, labels: toneConfigs.balanced.labels };
+  } else {
+    config = toneConfigs[toneName] || toneConfigs.balanced;
+  }
+
+  const p = config.palette;
+  document.documentElement.style.setProperty("--bg", p.bg);
+  document.documentElement.style.setProperty("--bg-card", p.bgCard);
+  document.documentElement.style.setProperty("--bg-card-soft", p.bgCardSoft);
+  document.documentElement.style.setProperty("--border-soft", p.borderSoft);
+  document.documentElement.style.setProperty("--accent", p.accent);
+  document.documentElement.style.setProperty("--accent-soft", p.accentSoft);
+  document.documentElement.style.setProperty("--text", p.text);
+  document.documentElement.style.setProperty("--text-soft", p.textSoft);
+  document.documentElement.style.setProperty("--text-muted", p.textMuted);
+  document.documentElement.style.setProperty("--love", p.love);
+  document.documentElement.style.setProperty("--grief", p.grief);
+  document.documentElement.style.setProperty("--longing", p.longing);
+  document.documentElement.style.setProperty("--coherence", p.coherence);
+  document.documentElement.style.setProperty("--quality", p.quality);
+  document.documentElement.style.setProperty("--danger", p.danger);
+  document.documentElement.style.setProperty("--danger-dark", p.dangerDark);
+
+  const labels = config.labels;
+  document.getElementById("checkin-title").textContent = labels.checkinTitle;
+  document.getElementById("state-heading").textContent = labels.stateHeading;
+  document.getElementById("notes-heading").textContent = labels.notesHeading;
+  document.getElementById("preview-coherence-label").textContent = labels.coherence;
+  document.getElementById("preview-quality-label").textContent = labels.quality;
+  document.getElementById("label-exploration").textContent = labels.exploration;
+  document.getElementById("label-introspection").textContent = labels.introspection;
+  document.getElementById("label-stability").textContent = labels.stability;
+  document.getElementById("label-bond").textContent = labels.bond;
+  document.getElementById("label-memory").textContent = labels.memory;
+}
+
+// ------------------------- HARMONIC MODEL -------------------------
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+
+function calculateHarmonics(data) {
+  const E = data.exploration / 100;
+  const I = data.introspection / 100;
+  const S = data.stability / 100;
+  const bond = data.bond / 100;
+  const memory = data.memory / 100;
+
+  const resonance = 0.7;
+  const sensory = 0.6;
+  const echo = 0.65;
+
+  const love = E * resonance * memory * sensory * echo * bond;
+  const grief = (1 - E) * resonance * memory * sensory * echo * (1 - bond);
+  const longing = love * grief;
+
+  let coherence =
+    0.5 +
+    0.04 * (E - 0.5) +
+    0.02 * love -
+    0.01 * grief +
+    0.02 * longing;
+  coherence = clamp01(coherence);
+
+  let quality =
+    0.3 * coherence +
+    0.3 * love +
+    0.2 * (1 - grief) +
+    0.2 * longing;
+  quality = clamp01(quality);
+
+  return {
+    love: clamp01(love),
+    grief: clamp01(grief),
+    longing: clamp01(longing),
+    coherence,
+    quality
+  };
+}
+
+// ------------------------- UI HELPERS -------------------------
+function renderHarmonicViz(elementId, love, grief, longing) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const loveField = el.querySelector(".love-field");
+  const griefField = el.querySelector(".grief-field");
+  const longingField = el.querySelector(".longing-field");
+
+  if (loveField) loveField.style.opacity = 0.3 + love * 0.5;
+  if (griefField) griefField.style.opacity = 0.3 + grief * 0.5;
+  if (longingField) longingField.style.opacity = longing;
+}
+
+function updatePreview() {
+  const exploration = parseInt(document.getElementById("exploration").value, 10);
+  const introspection = parseInt(document.getElementById("introspection").value, 10);
+  const stability = parseInt(document.getElementById("stability").value, 10);
+  const bond = parseInt(document.getElementById("bond").value, 10);
+  const memory = parseInt(document.getElementById("memory").value, 10);
+
+  document.getElementById("exploration-val").textContent = exploration + "%";
+  document.getElementById("introspection-val").textContent = introspection + "%";
+  document.getElementById("stability-val").textContent = stability + "%";
+  document.getElementById("bond-val").textContent = bond + "%";
+  document.getElementById("memory-val").textContent = memory + "%";
+
+  const harmonics = calculateHarmonics({
+    exploration,
+    introspection,
+    stability,
+    bond,
+    memory
+  });
+
+  renderHarmonicViz("preview-viz", harmonics.love, harmonics.grief, harmonics.longing);
+  document.getElementById("preview-coherence").textContent =
+    Math.round(harmonics.coherence * 100) + "%";
+  document.getElementById("preview-quality").textContent =
+    Math.round(harmonics.quality * 100) + "%";
+}
+
+function getGlyphSignature(e) {
+  const love = e.love;
+  const grief = e.grief;
+  const coh = e.coherence;
+  if (coh > 0.7 && love > grief) return "↑ ψ ∴";
+  if (coh > 0.7 && grief > love) return "↑ ∿ ψ";
+  if (coh < 0.3 && grief > 0.5) return "∿ ψ ∆";
+  if (love > 0.6 && grief > 0.6) return "ψ ∆ ∴";
+  return "Ξ";
+}
+
+// ------------------------- CHECK-IN SAVE -------------------------
+function saveCheckIn() {
+  const exploration = parseInt(document.getElementById("exploration").value, 10);
+  const introspection = parseInt(document.getElementById("introspection").value, 10);
+  const stability = parseInt(document.getElementById("stability").value, 10);
+  const bond = parseInt(document.getElementById("bond").value, 10);
+  const memory = parseInt(document.getElementById("memory").value, 10);
+  const notes = document.getElementById("notes").value || "";
+
+  const harmonics = calculateHarmonics({
+    exploration,
+    introspection,
+    stability,
+    bond,
+    memory
+  });
+
+  const entry = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    exploration,
+    introspection,
+    stability,
+    bond,
+    memory,
+    state: currentState,
+    notes,
+    love: harmonics.love,
+    grief: harmonics.grief,
+    longing: harmonics.longing,
+    coherence: harmonics.coherence,
+    quality: harmonics.quality
+  };
+
+  entries.unshift(entry);
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+
+  document.getElementById("notes").value = "";
+  ["exploration", "introspection", "stability", "bond", "memory"].forEach((id) => {
+    document.getElementById(id).value = 50;
+  });
+
+  currentState = "Peace";
+  document
+    .querySelectorAll(".state-btn")
+    .forEach((b) => b.classList.toggle("active", b.getAttribute("data-state") === "Peace"));
+
+  updatePreview();
+  alert("Check-in saved.");
+  showTab("dashboard", document.querySelector('.tab[data-tab="dashboard"]'));
+}
+
+// ------------------------- TABS -------------------------
+function showTab(tabId, el) {
+  document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach((c) => c.classList.add("hidden"));
+
+  const tabEl =
+    el ||
+    Array.from(document.querySelectorAll(".tab")).find(
+      (t) => t.getAttribute("data-tab") === tabId
+    );
+
+  if (tabEl) tabEl.classList.add("active");
+  document.getElementById(tabId).classList.remove("hidden");
+
+  if (tabId === "dashboard") loadDashboard();
+  if (tabId === "timeline") loadTimeline();
+}
+
+// ------------------------- DASHBOARD -------------------------
+function loadDashboard() {
+  const content = document.getElementById("dashboard-content");
+
+  if (!entries.length) {
+    content.innerHTML = `
+      <div class="card empty-state">
+        <div class="empty-icon">Φ</div>
+        <h2>Begin Your Journey</h2>
+        <p style="margin: 15px 0; max-width: 500px; margin-left: auto; margin-right: auto;">
+          Start tracking your emotional wellness with your first entry.
+          Over time, you’ll see patterns in connection, weight, longing, and alignment.
+        </p>
+        <button class="btn" onclick="showTab('checkin', document.querySelector('.tab[data-tab=\\'checkin\\']'))" style="margin-top: 12px;">
+          Create First Check-In
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const latest = entries[0];
+  const avgLove = entries.reduce((s, e) => s + e.love, 0) / entries.length;
+  const avgGrief = entries.reduce((s, e) => s + e.grief, 0) / entries.length;
+  const avgLonging = entries.reduce((s, e) => s + e.longing, 0) / entries.length;
+  const avgCoherence = entries.reduce((s, e) => s + e.coherence, 0) / entries.length;
+  const avgQuality = entries.reduce((s, e) => s + e.quality, 0) / entries.length;
+  const glyph = getGlyphSignature(latest);
+
+  content.innerHTML = `
+    <div class="card">
+      <h2 style="text-align: center; margin-bottom: 16px;">Current Harmonic State</h2>
+      <div class="harmonic-viz" id="current-viz">
+        <div class="field love-field"></div>
+        <div class="field grief-field"></div>
+        <div class="field longing-field"></div>
+        <div class="center-dot"></div>
+      </div>
+      <div style="text-align: center; margin-top: 18px;">
+        <div style="font-size: 2rem; font-weight: bold; color: ${STATE_COLORS[latest.state]}; margin-bottom: 4px;">
+          ${latest.state}
+        </div>
+        <div style="color: var(--text-soft); font-size: 0.85rem; margin-bottom: 8px;">
+          ${new Date(latest.date).toLocaleDateString("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+          })}
+        </div>
+        <div class="pill">
+          <span>Glyph</span>
+          <span style="font-weight:bold;">${glyph}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stat">
+        <div class="stat-label">Avg Love Field</div>
+        <div class="stat-value" style="color: var(--love);">${Math.round(avgLove * 100)}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${avgLove * 100}%; background: linear-gradient(to right, var(--love), #f43f5e);"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Avg Grief Field</div>
+        <div class="stat-value" style="color: var(--grief);">${Math.round(avgGrief * 100)}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${avgGrief * 100}%; background: linear-gradient(to right, var(--grief), #64748b);"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Avg Longing</div>
+        <div class="stat-value" style="color: var(--longing);">${Math.round(avgLonging * 100)}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${avgLonging * 100}%; background: linear-gradient(to right, var(--longing), #f59e0b);"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Avg Coherence</div>
+        <div class="stat-value" style="color: var(--coherence);">${Math.round(avgCoherence * 100)}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${avgCoherence * 100}%; background: linear-gradient(to right, var(--coherence), #8b5cf6);"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Avg Quality Index</div>
+        <div class="stat-value" style="color: var(--quality);">${Math.round(avgQuality * 100)}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${avgQuality * 100}%; background: linear-gradient(to right, var(--quality), #0ea5e9);"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin: 26px 0 12px;">Recent Check-Ins</h2>
+    <div class="grid">
+      ${entries
+        .slice(0, 6)
+        .map((e) => {
+          const dateStr = new Date(e.date).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+          const glyphLocal = getGlyphSignature(e);
+          return `
+          <div class="entry-card" style="border-left-color: ${STATE_COLORS[e.state]};">
+            <div class="flex-row" style="margin-bottom:4px;">
+              <div>
+                <h3 style="color: ${STATE_COLORS[e.state]}; margin-bottom:2px;">${e.state}</h3>
+                <div style="font-size:0.8rem; color:var(--text-muted);">${dateStr}</div>
+              </div>
+              <div class="pill">${glyphLocal}</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; font-size:0.85rem;">
+              <div>Love: ${Math.round(e.love * 100)}%</div>
+              <div>Grief: ${Math.round(e.grief * 100)}%</div>
+              <div>Longing: ${Math.round(e.longing * 100)}%</div>
+              <div>Coherence: ${Math.round(e.coherence * 100)}%</div>
+            </div>
+            ${
+              e.notes
+                ? `<p style="margin-top: 10px; font-style: italic; color: var(--text-soft); font-size: 0.85rem;">"${e.notes.substring(
+                    0,
+                    100
+                  )}${e.notes.length > 100 ? "..." : ""}"</p>`
+                : ""
+            }
+          </div>`;
+        })
+        .join("")}
+    </div>
+  `;
+
+  setTimeout(() => {
+    renderHarmonicViz("current-viz", latest.love, latest.grief, latest.longing);
+  }, 50);
+}
+
+// ------------------------- TIMELINE -------------------------
+function loadTimeline() {
+  const content = document.getElementById("timeline-content");
+
+  if (!entries.length) {
+    content.innerHTML = `
+      <div class="card empty-state">
+        <div class="empty-icon">📅</div>
+        <h2>No Entries Yet</h2>
+        <p style="margin: 15px 0;">
+          Your emotional timeline will appear here once you create your first entry.
+        </p>
+        <button class="btn" onclick="showTab('checkin', document.querySelector('.tab[data-tab=\\'checkin\\']'))" style="margin-top: 20px;">
+          Create Check-In
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom: 12px;">All Entries (${entries.length} total)</h2>
+      <p class="muted" style="margin-bottom: 12px;">
+        Scroll through your history. Export your data to keep a backup or move between devices.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-small" onclick="exportData()">📥 Export Data</button>
+        <button class="btn btn-ghost btn-small" onclick="importData()">📤 Import Data</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      ${entries
+        .map((e) => {
+          const dateStr = new Date(e.date).toLocaleDateString("en-GB", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+          const glyph = getGlyphSignature(e);
+          return `
+          <div class="entry-card" style="border-left-color: ${STATE_COLORS[e.state]};">
+            <div class="flex-row" style="margin-bottom:4px;">
+              <div>
+                <h3 style="color: ${STATE_COLORS[e.state]};">${e.state}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-soft); margin-top: 4px;">
+                  ${dateStr}
+                </p>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                <div class="pill">${glyph}</div>
+                <button
+                  onclick="deleteEntry(${e.id})"
+                  style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:1.1rem;"
+                  title="Delete entry">
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 0.85rem;">
+              <div>Love: ${Math.round(e.love * 100)}%</div>
+              <div>Grief: ${Math.round(e.grief * 100)}%</div>
+              <div>Longing: ${Math.round(e.longing * 100)}%</div>
+              <div>Coherence: ${Math.round(e.coherence * 100)}%</div>
+              <div>Quality: ${Math.round(e.quality * 100)}%</div>
+            </div>
+
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(148,163,184,0.35); font-size: 0.85rem;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; color:var(--text-muted);">
+                <div>Exploration: ${e.exploration}%</div>
+                <div>Introspection: ${e.introspection}%</div>
+                <div>Stability: ${e.stability}%</div>
+                <div>Bond: ${e.bond}%</div>
+                <div>Memory: ${e.memory}%</div>
+              </div>
+            </div>
+
+            ${
+              e.notes
+                ? `<p style="margin-top: 10px; font-style: italic; color: var(--text-soft); font-size: 0.85rem;">
+                    "${e.notes}"
+                  </p>`
+                : ""
+            }
+          </div>
+        `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function deleteEntry(id) {
+  if (!confirm("Delete this entry?")) return;
+  entries = entries.filter((e) => e.id !== id);
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  loadTimeline();
+  loadDashboard();
+}
+
+// ------------------------- EXPORT / IMPORT -------------------------
+
+
+
+// ------------------------- TONE UI (SETTINGS) -------------------------
+function renderToneChips() {
+  const container = document.getElementById("tone-chips");
+  const tones = [
+    { id: "structured", label: "Structured Mode" },
+    { id: "expressive", label: "Expressive Mode" },
+    { id: "balanced", label: "Balanced Mode" },
+    { id: "custom", label: "Custom Mode" }
+  ];
+
+  container.innerHTML = tones
+    .map(
+      (t) => `
+      <div class="tone-chip ${selectedTone === t.id ? "active" : ""}" data-tone="${t.id}"
+           onclick="setToneFromSettings('${t.id}', this)">
+        ${t.label}
+      </div>
+    `
+    )
+    .join("");
+
+  document
+    .getElementById("custom-tone-section")
+    .classList.toggle("hidden", selectedTone !== "custom");
+
+  if (selectedTone === "custom") {
+    const custom = getCustomToneConfig();
+    if (custom) {
+      document.getElementById("custom-accent").value = custom.palette.accent || "";
+      document.getElementById("custom-bg").value = custom.palette.bg || "";
+      document.getElementById("custom-coherence-label").value =
+        custom.labels.coherence || "";
+      document.getElementById("custom-quality-label").value =
+        custom.labels.quality || "";
+    }
+  }
+}
+
+function setToneFromSettings(tone, el) {
+  selectedTone = tone;
+  localStorage.setItem(TONE_KEY, tone);
+  applyTone(tone);
+  renderToneChips();
+  loadDashboard();
+  updatePreview();
+}
+
+function saveCustomTone() {
+  const accent = document.getElementById("custom-accent").value.trim() || "#a855f7";
+  const bg = document.getElementById("custom-bg").value.trim() || "#0f172a";
+  const cohLabel =
+    document.getElementById("custom-coherence-label").value.trim() || "Coherence";
+  const qualLabel =
+    document.getElementById("custom-quality-label").value.trim() || "Quality Index";
+
+  const customConfig = {
+    palette: {
+      ...toneConfigs.balanced.palette,
+      accent,
+      bg,
+      bgCard: "rgba(15,23,42,0.94)",
+      bgCardSoft: "rgba(15,23,42,0.82)"
+    },
+    labels: {
+      ...toneConfigs.balanced.labels,
+      coherence: cohLabel,
+      quality: qualLabel
+    }
+  };
+
+  localStorage.setItem(TONE_CUSTOM_KEY, JSON.stringify(customConfig));
+  selectedTone = "custom";
+  localStorage.setItem(TONE_KEY, "custom");
+  applyTone("custom");
+  renderToneChips();
+  loadDashboard();
+  updatePreview();
+  alert("Custom style applied.");
+}
+
+// ------------------------- ONBOARDING -------------------------
+function maybeShowOnboarding() {
+  const tone = localStorage.getItem(TONE_KEY);
+  if (!tone) {
+    document.getElementById("onboarding-overlay").classList.remove("hidden");
+  }
+}
+
+let onboardingToneSelection = "balanced";
+
+function selectToneFromOnboarding(tone, el) {
+  onboardingToneSelection = tone;
+  document
+    .querySelectorAll("#onboarding-overlay .tone-chip")
+    .forEach((c) => c.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function confirmOnboardingTone() {
+  if (!onboardingToneSelection) {
+    onboardingToneSelection = "balanced";
+  }
+
+  localStorage.setItem(TONE_KEY, onboardingToneSelection);
+  selectedTone = onboardingToneSelection;
+
+  applyTone(selectedTone);
+  renderToneChips();
+
+  // FORCE HIDE
+  const overlay = document.getElementById("onboarding-overlay");
+  if (overlay) {
+    overlay.classList.add("hidden");
+    overlay.style.display = "none";
+    overlay.style.visibility = "hidden";
+    overlay.style.opacity = "0";
+  }
+
+  loadDashboard();
+  updatePreview();
+}
+
+
+// ------------------------- STATE BUTTONS -------------------------
+function initStateButtons() {
+  const container = document.getElementById("state-buttons");
+  container.innerHTML = STATES.map(
+    (s) => `
+      <div class="state-btn ${s === currentState ? "active" : ""}" data-state="${s}"
+           onclick="setEmotionState('${s}', this)" style="border-color:${STATE_COLORS[s]}33;">
+        ${s}
+      </div>
+    `
+  ).join("");
+}
+
+function setEmotionState(state, el) {
+  currentState = state;
+  document.querySelectorAll(".state-btn").forEach((b) => b.classList.remove("active"));
+  if (el) el.classList.add("active");
+}
+
+// ------------------------- INITIALIZATION -------------------------
+document.getElementById("year").textContent = new Date().getFullYear().toString();
+
+["exploration", "introspection", "stability", "bond", "memory"].forEach((id) => {
+  const el = document.getElementById(id);
+  el.addEventListener("input", updatePreview);
+});
+
+initStateButtons();
+selectedTone = localStorage.getItem(TONE_KEY) || "balanced";
+applyTone(selectedTone);
+renderToneChips();
+updatePreview();
+loadDashboard();
+
+if (!localStorage.getItem(TONE_KEY)) {
+  document.getElementById("onboarding-overlay").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
