@@ -1,8 +1,8 @@
 # Lumenis
 Lumenis is a harmonically guided mental health tracker
 Lumenis  Emotional Wellness Through Harmonic Insight
-Lumenis is a browser‑based emotional wellness tracker designed to help you understand your inner patterns through harmonic visualization, reflective check‑ins, and a gentle, customizable interface.
-It blends structured metrics with symbolic resonance to give you a clearer sense of your emotional landscape — without judgment, pressure, or clinical framing.
+Lumenis is a browser based emotional wellness tracker designed to help you understand your inner patterns through harmonic visualization, reflective check‑ins, and a gentle, customizable interface.
+It blends structured metrics with symbolic resonance to give you a clearer sense of your emotional landscape   without judgment, pressure, or clinical framing.
 
 All data stays on your device. No accounts. No servers. No tracking.
 
