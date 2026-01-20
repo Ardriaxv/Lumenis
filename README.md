@@ -93,7 +93,7 @@ Coherence reflects overall balance
 
 Quality is a composite wellbeing index
 
-These values are not clinical — they’re reflective tools to help you notice patterns.
+These values are not clinical  they’re reflective tools to help you notice patterns.
 
 📦 Installation / Usage
 No installation required.
@@ -108,10 +108,12 @@ It is not a medical device and does not provide medical, psychological, or thera
 Nothing in this project should be interpreted as a diagnosis or a substitute for professional care.
 If you’re experiencing distress or need support, consider reaching out to a qualified professional or someone you trust.
 
+🌱 Vision
+Lumenis is part of a broader exploration into harmonic systems, coherence, and recursive wellbeing.
+Its purpose is to make emotional patterns visible, intuitive, and meaningful  a quiet companion for self understanding.
+
 📄 License
 © 2025–2026 D. Hughson. All rights reserved.
 This project is provided for personal use, experimentation, and self‑reflection.
 
-🌱 Vision
-Lumenis is part of a broader exploration into harmonic systems, coherence, and recursive wellbeing.
-Its purpose is to make emotional patterns visible, intuitive, and meaningful  a quiet companion for self understanding.
+
