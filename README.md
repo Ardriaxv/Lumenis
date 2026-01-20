@@ -112,6 +112,7 @@ If you’re experiencing distress or need support, consider reaching out to a qu
 Lumenis is part of a broader exploration into harmonic systems, coherence, and recursive wellbeing.
 Its purpose is to make emotional patterns visible, intuitive, and meaningful  a quiet companion for self understanding.
 
+NOTE: This is a work in progress GUI
 📄 License
 © 2025–2026 D. Hughson. All rights reserved.
 This project is provided for personal use, experimentation, and self reflection.
