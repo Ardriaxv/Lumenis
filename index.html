@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Harmonia - Emotional Wellness Tracker</title>
+<title>Lumenis Emotional Wellness Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
@@ -1034,7 +1034,7 @@ function loadDashboard() {
   if (!entries.length) {
     content.innerHTML = `
       <div class="card empty-state">
-        <div class="empty-icon">Φ</div>
+        <div class="empty-icon" style="color: gold;">Φ</div>
         <h2>Begin Your Journey</h2>
         <p style="margin: 15px 0; max-width: 500px; margin-left: auto; margin-right: auto;">
           Start tracking your emotional wellness with your first entry.
@@ -1444,3 +1444,4 @@ if (!localStorage.getItem(TONE_KEY)) {
 </script>
 </body>
 </html>
+
