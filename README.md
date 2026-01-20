@@ -114,6 +114,6 @@ Its purpose is to make emotional patterns visible, intuitive, and meaningful  a 
 
 📄 License
 © 2025–2026 D. Hughson. All rights reserved.
-This project is provided for personal use, experimentation, and self‑reflection.
+This project is provided for personal use, experimentation, and self reflection.
 
 
