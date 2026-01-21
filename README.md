@@ -1,4 +1,4 @@
-[![View Site](https://img.shields.io/badge/Live_Site-Visit-blue)](https://ardriaxv.github.io/Lumnis/)
+[![View Site](https://img.shields.io/badge/Live_Site-Visit-blue)](https://ardriaxv.github.io/Lumenis/)
 
 
 # Lumenis
