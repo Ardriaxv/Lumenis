@@ -26,9 +26,9 @@
   --danger: #ef4444;
   --danger-dark: #b91c1c;
 }
-.gold-phi.gloss-solid-red {
+.gold-phi {
   font-size: 60px;
-  font-weight: 300;
+  font-weight: 400;
   color: #d40000; /* deep solid red */
 
   position: relative;
@@ -53,6 +53,7 @@
   color: transparent;
   pointer-events: none;
 }
+
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -108,18 +109,15 @@ h1 {
 .card {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 20px;
+  -webkit-backdrop-filter: blur(10px);
+  ...
 }
 
 .soft-card {
   background: var(--bg-card-soft);
-  border: 1px solid rgba(148,163,184,0.3);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  ...
 }
 
 /* Harmonic viz */
@@ -643,10 +641,9 @@ footer {
     <div class="card">
       <h2 style="margin-bottom: 10px;">Data & Safety</h2>
       <p class="muted" style="margin-bottom: 12px;">
-        Your data is stored only on this device using your browser's local storage. You can clear it internally by resetting it at any time.
+        Your data is stored only on this device using your browser's local storage. You can clear it interanly by resetting it at any time.
       </p>
-
-      
+    </div>
 
   <footer>
     <p>© <span id="year"></span> D. Hughson. All rights reserved. Lumenis is a personal reflection tool, not medical advice.</p>
@@ -1305,7 +1302,65 @@ function deleteEntry(id) {
 }
 
 // ------------------------- EXPORT / IMPORT -------------------------
+// -------- SAFE EXPORT / IMPORT (APPLE COMPATIBLE) --------
+function exportData() {
+  const data = {
+    entries: entries,
+    tone: selectedTone,
+    customTone: localStorage.getItem(TONE_CUSTOM_KEY)
+  };
 
+  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "lumenis-backup.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "application/json";
+
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (Array.isArray(data.entries)) {
+          entries = data.entries;
+          localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+        }
+        if (data.tone) {
+          selectedTone = data.tone;
+          localStorage.setItem(TONE_KEY, selectedTone);
+        }
+        if (data.customTone) {
+          localStorage.setItem(TONE_CUSTOM_KEY, data.customTone);
+        }
+
+        applyTone(selectedTone);
+        renderToneChips();
+        loadDashboard();
+        updatePreview();
+        alert("Import successful");
+      } catch {
+        alert("Invalid file");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  input.click();
+}
 
 
 // ------------------------- TONE UI (SETTINGS) -------------------------
@@ -1405,6 +1460,17 @@ function selectToneFromOnboarding(tone, el) {
     .forEach((c) => c.classList.remove("active"));
   el.classList.add("active");
 }
+function dismissOnboarding() {
+  onboardingToneSelection = selectedTone || "balanced";
+
+  const overlay = document.getElementById("onboarding-overlay");
+  overlay.classList.add("hidden");
+  overlay.style.display = "none";
+  overlay.style.pointerEvents = "none";
+
+  // Ensure app renders
+  showTab("dashboard", document.querySelector('.tab[data-tab="dashboard"]'));
+}
 
 function confirmOnboardingTone() {
   if (!onboardingToneSelection) {
@@ -1417,19 +1483,18 @@ function confirmOnboardingTone() {
   applyTone(selectedTone);
   renderToneChips();
 
-  // FORCE HIDE
   const overlay = document.getElementById("onboarding-overlay");
-  if (overlay) {
-    overlay.classList.add("hidden");
-    overlay.style.display = "none";
-    overlay.style.visibility = "hidden";
-    overlay.style.opacity = "0";
-  }
+  overlay.classList.add("hidden");
+  overlay.style.display = "none";
+  overlay.style.pointerEvents = "none";
 
-  loadDashboard();
-  updatePreview();
+  // 🔓 UNLOCK APP
+  document.body.classList.remove("onboarding-active");
+  document.body.style.overflow = "";
+
+  // 🔄 FORCE UI
+  showTab("dashboard", document.querySelector('.tab[data-tab="dashboard"]'));
 }
-
 
 // ------------------------- STATE BUTTONS -------------------------
 function initStateButtons() {
@@ -1471,9 +1536,3 @@ if (!localStorage.getItem(TONE_KEY)) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
