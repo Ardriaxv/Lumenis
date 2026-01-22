@@ -10,7 +10,7 @@ It blends structured metrics with symbolic resonance to give you a clearer sense
 
 All data stays on your device. No accounts. No servers. No tracking.
 
-✨ What Lumenis Does
+What Lumenis Does
 Lumenis offers a simple, intuitive way to explore your emotional state:
 
 Adjust five core metrics (exploration, introspection, stability, connection, memory)
@@ -29,7 +29,7 @@ Keep everything stored privately in your browser
 
 The goal is awareness, not diagnosis.
 
-🎨 Features
+Features
 Harmonic Field Visualization
 A layered, glowing field representing:
 
@@ -84,7 +84,7 @@ Local Only Data
 Everything is stored in your browser’s localStorage.
 You can clear it at any time.
 
-🧠 The Harmonic Model (Simple Overview)
+The Harmonic Model (Simple Overview)
 Lumenis uses a symbolic harmonic model to compute emotional resonance:
 
 Love increases with exploration, memory presence, resonance, and connection
@@ -99,26 +99,26 @@ Quality is a composite wellbeing index
 
 These values are not clinical  they’re reflective tools to help you notice patterns.
 
-📦 Installation / Usage
+Installation / Usage
 No installation required.
 
 Just open index.html in any modern browser.
 
 Or host it via GitHub Pages for instant access.
 
-⚠️ Disclaimer
+Disclaimer
 Lumenis is a personal reflection and wellness tracking tool.
 It is not a medical device and does not provide medical, psychological, or therapeutic advice.
 Nothing in this project should be interpreted as a diagnosis or a substitute for professional care.
 If you’re experiencing distress or need support, consider reaching out to a qualified professional or someone you trust.
 
-🌱 Vision
+Vision
 Lumenis is part of a broader exploration into harmonic systems, coherence, and recursive wellbeing.
 Its purpose is to make emotional patterns visible, intuitive, and meaningful  a quiet companion for self understanding.
 
 NOTE: This is a work in progress GUI
 
-📄 License
+License
 © 2025–2026 D. Hughson. All rights reserved.
 This project is provided for personal use, experimentation, and self reflection.
 
