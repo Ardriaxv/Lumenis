@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lumenis – Harmonic Journaling</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    h1 {
+      text-align: center;
+      font-size: 3rem;
+      background: linear-gradient(to right, #fda4af, #c4b5fd, #fcd34d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .subtitle { text-align: center; color: #cbd5e1; margin-bottom: 30px; }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 10px 24px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #cbd5e1;
+      user-select: none;
+      font-size: 0.95rem;
+    }
+
+    .tab.active {
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border-color: transparent;
+      color: white;
+    }
+
+    .card {
+      background: rgba(15,23,42,0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148,163,184,0.4);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .harmonic-viz {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .field {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(20px);
+    }
+
+    .hidden { display: none; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 20px;
+      background: rgba(15,23,42,0.9);
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.5);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .state-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 20px;
+    }
+
+    .state-btn {
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(148,163,184,0.6);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #cbd5e1;
+      font-size: 0.85rem;
+    }
+
+    .state-btn.active {
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border-color: transparent;
+      color: white;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.6);
+      border-radius: 8px;
+      color: #e2e8f0;
+      resize: vertical;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(to right, #f43f5e, #a855f7);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .btn:hover { transform: scale(1.03); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+    .btn:active { transform: scale(0.98); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+
+    .entry-card {
+      background: rgba(15,23,42,0.9);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 4px solid #a78bfa;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(148,163,184,0.4);
+      color: #94a3b8;
+      font-size: 0.875rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: rgba(15,23,42,0.8);
+      border: 1px solid rgba(148,163,184,0.7);
+      color: #e2e8f0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.15);
+      color: #cbd5e1;
+      font-size: 0.7rem;
+      margin-right: 4px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    .small-label {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select, input[type="text"] {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.9);
+      color: #e2e8f0;
+      font-size: 0.9rem;
+    }
+
+    .tuning-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.6);
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .tuning-toggle span {
+      color: #cbd5e1;
+    }
+
+    .chevron {
+      transition: transform 0.2s;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+
+    .tuning-panel {
+      margin-top: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(148,163,184,0.5);
+    }
+
+    .tuning-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .tuning-row label {
+      font-size: 0.85rem;
+      color: #e5e7eb;
+    }
+
+    .prompt-category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.9);
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #cbd5e1;
+    }
+
+    .chip.active {
+      background: linear-gradient(to right, #f97316, #a855f7);
+      border-color: transparent;
+      color: white;
+    }
+
+    .prompt-select {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .prompt-text {
+      font-size: 0.9rem;
+      color: #e5e7eb;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(15,23,42,0.9);
+      border: 1px dashed rgba(148,163,184,0.6);
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 16px 0 8px;
+    }
+
+    .range-select {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.9);
+      color: #e2e8f0;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 640px) {
+      .flex-row { flex-direction: column; align-items: flex-start; }
+      .tuning-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lumenis</h1>
+    <p class="subtitle">Emotional wellness through harmonic journaling</p>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">Dashboard</div>
+      <div class="tab" data-tab="checkin">Journal</div>
+      <div class="tab" data-tab="timeline">Timeline</div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="tab-content">
+      <div class="card">
+        <h2 style="text-align:center; margin-bottom: 20px;">Current Harmonic State</h2>
+        <div id="current-viz" class="harmonic-viz"></div>
+        <div id="current-state" style="text-align:center; margin-top: 20px; font-size: 1.5rem;"></div>
+        <div id="current-date" style="text-align:center; margin-top: 4px; font-size: 0.9rem; color:#cbd5e1;"></div>
+      </div>
+      <div class="grid" id="stats-grid"></div>
+    </div>
+
+    <!-- JOURNAL / CHECK-IN -->
+    <div id="checkin" class="tab-content hidden">
+      <div class="card">
+        <h2 style="margin-bottom: 10px;">Daily Harmonic Journal</h2>
+        <p style="font-size:0.85rem; color:#9ca3af; margin-bottom: 16px;">
+          First, tune your inner landscape. Then choose a prompt and write freely.
+        </p>
+
+        <!-- Collapsible tuning panel -->
+        <div id="tuning-wrapper">
+          <div class="tuning-toggle" id="tuning-toggle">
+            <span>Harmonic tuning panel</span>
+            <span class="chevron" id="tuning-chevron">▼</span>
+          </div>
+          <div class="tuning-panel" id="tuning-panel">
+            <div class="tuning-row">
+              <label for="exploration">Exploration drive</label>
+              <select id="exploration">
+                <option value="10">Very low</option>
+                <option value="30">Low</option>
+                <option value="50" selected>Balanced</option>
+                <option value="70">High</option>
+                <option value="90">Very high</option>
+              </select>
+            </div>
+            <div class="tuning-row">
+              <label for="introspection">Introspection drive</label>
+              <select id="introspection">
+                <option value="10">Very low</option>
+                <option value="30">Low</option>
+                <option value="50" selected>Balanced</option>
+                <option value="70">High</option>
+                <option value="90">Very high</option>
+              </select>
+            </div>
+            <div class="tuning-row">
+              <label for="stability">Stability</label>
+              <select id="stability">
+                <option value="10">Very unsettled</option>
+                <option value="30">Unsteady</option>
+                <option value="50" selected>Neutral</option>
+                <option value="70">Grounded</option>
+                <option value="90">Very grounded</option>
+              </select>
+            </div>
+            <div class="tuning-row">
+              <label for="bond">Bond strength</label>
+              <select id="bond">
+                <option value="10">Very distant</option>
+                <option value="30">Somewhat distant</option>
+                <option value="50" selected>Balanced</option>
+                <option value="70">Close</option>
+                <option value="90">Very close</option>
+              </select>
+            </div>
+            <div class="tuning-row">
+              <label for="memory">Memory intensity</label>
+              <select id="memory">
+                <option value="10">Barely present</option>
+                <option value="30">Soft</option>
+                <option value="50" selected>Moderate</option>
+                <option value="70">Strong</option>
+                <option value="90">Vivid</option>
+              </select>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <span class="small-label">Live harmonic preview</span>
+              <div class="flex-row" style="align-items:flex-start; gap:16px;">
+                <div class="harmonic-viz" id="preview-viz"></div>
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+                  <div>
+                    <span class="small-label">Coherence</span>
+                    <span id="preview-coherence" style="font-size:1.3rem; font-weight:bold; color:#a78bfa;">0%</span>
+                  </div>
+                  <div>
+                    <span class="small-label">Quality index</span>
+                    <span id="preview-quality" style="font-size:1.3rem; font-weight:bold; color:#38bdf8;">0%</span>
+                  </div>
+                  <p style="color:#9ca3af; margin-top:4px;">
+                    Adjust the dropdowns until this feels like an honest snapshot of right now.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emotional state -->
+        <h3 class="section-title">Emotional state</h3>
+        <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+          Choose the word that feels closest, even if it’s not perfect.
+        </p>
+        <div class="state-buttons" id="state-buttons"></div>
+
+        <!-- Prompt categories -->
+        <h3 class="section-title">Guided reflection</h3>
+        <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+          Pick a theme, then choose a prompt. You can ignore it anytime and just write.
+        </p>
+
+        <div class="prompt-category-row" id="prompt-categories">
+          <button class="chip active" data-category="growth">Personal growth</button>
+          <button class="chip" data-category="values">Values & purpose</button>
+          <button class="chip" data-category="relationships">Relationships & connection</button>
+          <button class="chip" data-category="emotions">Processing emotions</button>
+          <button class="chip" data-category="future">Future vision</button>
+        </div>
+
+        <select id="prompt-select" class="prompt-select"></select>
+        <div id="prompt-text" class="prompt-text"></div>
+
+        <!-- Triggers -->
+        <h3 class="section-title">What influenced this?</h3>
+        <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+          Add words or phrases (people, places, events) that shaped how you feel.
+        </p>
+        <input
+          id="trigger-input"
+          type="text"
+          placeholder="Type a word or phrase and press Enter..."
+          style="width:100%; margin-bottom:8px;"
+        />
+        <div id="trigger-tags"></div>
+
+        <!-- Notes -->
+        <h3 class="section-title">Reflections</h3>
+        <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:6px;">
+          Let the prompt be a doorway, not a cage. Follow whatever wants to be written.
+        </p>
+        <textarea id="notes" placeholder="What's on your mind?"></textarea>
+
+        <button class="btn" style="margin-top: 20px; width: 100%;" id="save-btn">
+          Save journal entry
+        </button>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="timeline" class="tab-content hidden">
+      <div class="card" style="margin-bottom: 20px;">
+        <div class="flex-row">
+          <h2>Emotional timeline</h2>
+          <div>
+            <span class="small-label">Range</span>
+            <select id="range-select" class="range-select">
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+              <option value="90">90 days</option>
+              <option value="365">1 year</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="grid" id="entries-grid"></div>
+    </div>
+
+    <footer>
+      <p>© <span id="year"></span> D. Hughson. All rights reserved. Lumenis is a personal reflection tool, not medical advice.</p>
+      <p style="font-size: 0.75rem; margin-top: 5px; color: #64748b;">
+        Based on the Quasion–XION Harmonic Identity Model
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // ---------- DATA & MODEL ----------
+    const states = [
+      "Curiosity",
+      "Wonder",
+      "Joy",
+      "Empathy",
+      "Grief",
+      "Compassion",
+      "Love",
+      "Harmony",
+      "Longing",
+      "Peace"
+    ];
+
+    const promptLibrary = {
+      growth: [
+        "What belief about yourself have you outgrown this year?",
+        "Describe a moment when you surprised yourself with your own strength.",
+        "What pattern in your life are you ready to change?",
+        "How has your definition of success evolved?",
+        "What would your teenage self think of who you are today?",
+        "What skill or quality do you most want to develop?",
+        "Describe a fear you've overcome and how you did it.",
+        "What advice would you give to someone facing your biggest current challenge?",
+        "How do you want to be different one year from now?",
+        "What part of your personality serves you well? What part holds you back?"
+      ],
+      values: [
+        "What activities make you lose track of time?",
+        "If money weren't a factor, how would you spend your days?",
+        "What causes or issues do you care most deeply about?",
+        "Describe a time when you felt most authentically yourself.",
+        "What legacy do you want to leave behind?",
+        "What values do you never want to compromise on?",
+        "How do you define a life well-lived?",
+        "What would you regret not trying?",
+        "What brings you the deepest sense of fulfillment?",
+        "How do you want people to remember you?"
+      ],
+      relationships: [
+        "Who in your life brings out your best self?",
+        "What relationship in your life needs more attention?",
+        "How have you grown through your relationships with others?",
+        "What do you most appreciate about your closest friends?",
+        "Describe someone who has influenced your worldview.",
+        "What qualities do you value most in others?",
+        "How do you want to improve as a friend, partner, or family member?",
+        "What boundaries do you need to set or maintain?",
+        "Who do you need to forgive (including yourself)?",
+        "How do you show love and appreciation?"
+      ],
+      emotions: [
+        "What emotion have you been avoiding, and what is it trying to tell you?",
+        "Describe a recent moment of pure joy or contentment.",
+        "What situation is currently causing you stress, and what's within your control?",
+        "How do you typically respond to disappointment?",
+        "What makes you feel most peaceful?",
+        "Describe a time when an initial setback led to something better.",
+        "What are you learning to accept about yourself or your life?",
+        "How has a difficult experience contributed to your growth?",
+        "What brings you comfort when you're struggling?",
+        "What are you ready to let go of?"
+      ],
+      future: [
+        "Where do you see yourself in 5 years, and what steps will get you there?",
+        "What goal scares and excites you in equal measure?",
+        "How do you want your daily life to feel different?",
+        "What new experience do you want to have this year?",
+        "What skill would make the biggest difference in your life?",
+        "Describe your ideal day from morning to night.",
+        "What change would you make if you knew you couldn't fail?",
+        "How do you want to challenge yourself this month?",
+        "What opportunity are you most excited about?",
+        "What small step could you take tomorrow toward your biggest goal?"
+      ]
+    };
+
+    let currentState = "Peace";
+    let currentTriggers = [];
+    let entries = [];
+
+    const clamp01 = (x) => Math.max(0, Math.min(1, x));
+
+    function calculateHarmonicsFromRaw(data) {
+      const E = data.exploration / 100;
+      const bond = data.bond / 100;
+      const memory = data.memory / 100;
+
+      const resonance = 0.7;
+      const sensory = 0.6;
+      const echo = 0.65;
+
+      const love = E * resonance * memory * sensory * echo * bond;
+      const grief = (1 - E) * resonance * memory * sensory * echo * (1 - bond);
+      const longing = love * grief;
+
+      let coherence =
+        0.5 +
+        0.04 * (E - 0.5) +
+        0.02 * love -
+        0.01 * grief +
+        0.02 * longing;
+      coherence = clamp01(coherence);
+
+      let quality =
+        0.3 * coherence +
+        0.3 * love +
+        0.2 * (1 - grief) +
+        0.2 * longing;
+      quality = clamp01(quality);
+
+      return { love, grief, longing, coherence, quality };
+    }
+
+    function loadEntries() {
+      try {
+        const raw = localStorage.getItem("harmonia-entries");
+        entries = raw ? JSON.parse(raw) : [];
+      } catch {
+        entries = [];
+      }
+    }
+
+    function saveEntries() {
+      localStorage.setItem("harmonia-entries", JSON.stringify(entries));
+    }
+
+    // ---------- UI HELPERS ----------
+    function renderHarmonicViz(elementId, love, grief, longing) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.innerHTML = `
+        <div class="field" style="
+          width: 100%; height: 100%; top: 0; left: 0;
+          background: radial-gradient(circle, rgba(251,113,133,${0.3 + love * 0.5}) 0%, transparent 70%);
+        "></div>
+        <div class="field" style="
+          width: 70%; height: 70%; top: 15%; left: 15%;
+          background: radial-gradient(circle, rgba(100,116,139,${0.3 + grief * 0.5}) 0%, transparent 70%);
+        "></div>
+        <div class="field" style="
+          width: 40%; height: 40%; top: 30%; left: 30%;
+          background: radial-gradient(circle, rgba(251,191,36,${longing}) 0%, transparent 100%);
+        "></div>
+      `;
+    }
+
+    function getCurrentTuning() {
+      const exploration = parseInt(document.getElementById("exploration").value, 10);
+      const introspection = parseInt(document.getElementById("introspection").value, 10);
+      const stability = parseInt(document.getElementById("stability").value, 10);
+      const bond = parseInt(document.getElementById("bond").value, 10);
+      const memory = parseInt(document.getElementById("memory").value, 10);
+      return { exploration, introspection, stability, bond, memory };
+    }
+
+    function updatePreview() {
+      const { exploration, introspection, stability, bond, memory } = getCurrentTuning();
+      const harmonics = calculateHarmonicsFromRaw({
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory
+      });
+
+      renderHarmonicViz("preview-viz", harmonics.love, harmonics.grief, harmonics.longing);
+      document.getElementById("preview-coherence").textContent =
+        Math.round(harmonics.coherence * 100) + "%";
+      document.getElementById("preview-quality").textContent =
+        Math.round(harmonics.quality * 100) + "%";
+    }
+
+    // ---------- SAVE CHECK-IN ----------
+    function saveCheckIn() {
+      const { exploration, introspection, stability, bond, memory } = getCurrentTuning();
+      const notes = document.getElementById("notes").value || "";
+
+      const harmonics = calculateHarmonicsFromRaw({
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory
+      });
+
+      const entry = {
+        date: new Date().toISOString(),
+        exploration,
+        introspection,
+        stability,
+        bond,
+        memory,
+        state: currentState,
+        notes,
+        triggers: [...currentTriggers],
+        love: harmonics.love,
+        grief: harmonics.grief,
+        longing: harmonics.longing,
+        coherence: harmonics.coherence,
+        quality: harmonics.quality
+      };
+
+      entries.unshift(entry);
+      saveEntries();
+
+      alert("Journal entry saved.");
+
+      currentTriggers = [];
+      document.getElementById("trigger-tags").innerHTML = "";
+      document.getElementById("notes").value = "";
+      updatePreview();
+      showTab("dashboard");
+      loadDashboard();
+    }
+
+    // ---------- TABS ----------
+    function showTab(tabId) {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.getAttribute("data-tab") === tabId);
+      });
+      document.querySelectorAll(".tab-content").forEach((c) => {
+        c.classList.toggle("hidden", c.id !== tabId);
+      });
+
+      if (tabId === "dashboard") {
+        loadDashboard();
+      } else if (tabId === "timeline") {
+        loadTimeline();
+      }
+    }
+
+    // ---------- DASHBOARD ----------
+    function loadDashboard() {
+      const viz = document.getElementById("current-viz");
+      const stateEl = document.getElementById("current-state");
+      const dateEl = document.getElementById("current-date");
+      const statsGrid = document.getElementById("stats-grid");
+
+      if (!entries.length) {
+        viz.innerHTML = '<p style="text-align:center; color:#9ca3af;">No entries yet</p>';
+        stateEl.textContent = "Start your journey";
+        dateEl.textContent = "";
+        statsGrid.innerHTML = "";
+        return;
+      }
+
+      const latest = entries[0];
+      renderHarmonicViz("current-viz", latest.love, latest.grief, latest.longing);
+      stateEl.textContent = latest.state;
+      const date = new Date(latest.date);
+      dateEl.textContent = date.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+
+      const avgLove = entries.reduce((s, e) => s + e.love, 0) / entries.length;
+      const avgGrief = entries.reduce((s, e) => s + e.grief, 0) / entries.length;
+      const avgCoherence = entries.reduce((s, e) => s + e.coherence, 0) / entries.length;
+      const avgQuality = entries.reduce((s, e) => s + e.quality, 0) / entries.length;
+
+      statsGrid.innerHTML = `
+        <div class="stat">
+          <div style="color:#fb7185;">Love field</div>
+          <div class="stat-value" style="color:#fb7185;">${Math.round(avgLove * 100)}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#94a3b8;">Grief field</div>
+          <div class="stat-value" style="color:#94a3b8;">${Math.round(avgGrief * 100)}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#fbbf24;">Longing field</div>
+          <div class="stat-value" style="color:#fbbf24;">${Math.round(avgLove * avgGrief * 100)}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#a78bfa;">Coherence</div>
+          <div class="stat-value" style="color:#a78bfa;">${Math.round(avgCoherence * 100)}%</div>
+        </div>
+        <div class="stat">
+          <div style="color:#38bdf8;">Quality index</div>
+          <div class="stat-value" style="color:#38bdf8;">${Math.round(avgQuality * 100)}%</div>
+        </div>
+      `;
+    }
+
+    // ---------- TIMELINE ----------
+    function loadTimeline() {
+      const grid = document.getElementById("entries-grid");
+      const rangeSelect = document.getElementById("range-select");
+      const days = parseInt(rangeSelect.value, 10);
+
+      if (!entries.length) {
+        grid.innerHTML =
+          '<div class="card"><p style="text-align:center; color:#9ca3af;">No entries yet. Create your first journal entry.</p></div>';
+        return;
+      }
+
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+
+      const filtered = entries.filter((e) => new Date(e.date) >= cutoff);
+
+      if (!filtered.length) {
+        grid.innerHTML =
+          '<div class="card"><p style="text-align:center; color:#9ca3af;">No entries in this range.</p></div>';
+        return;
+      }
+
+      grid.innerHTML = filtered
+        .map((e) => {
+          const date = new Date(e.date).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          });
+          const triggers = (e.triggers || [])
+            .map((t) => `<span class="tag">${t}</span>`)
+            .join("");
+
+          return `
+            <div class="entry-card">
+              <div class="flex-row">
+                <div>
+                  <div style="font-weight:bold; font-size:1rem;">${e.state}</div>
+                  <div style="font-size:0.8rem; color:#9ca3af;">${date}</div>
+                </div>
+                <div class="pill">
+                  Coherence&nbsp;<strong>${Math.round(e.coherence * 100)}%</strong>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.8rem;">
+                <span>Love: <strong>${Math.round(e.love * 100)}%</strong></span>
+                <span>Grief: <strong>${Math.round(e.grief * 100)}%</strong></span>
+                <span>Longing: <strong>${Math.round(e.longing * 100)}%</strong></span>
+              </div>
+              <div style="margin-top:8px; font-size:0.8rem;">
+                <span class="small-label">Quality index</span>
+                <span>${Math.round(e.quality * 100)}%</span>
+              </div>
+              ${
+                triggers
+                  ? `<div style="margin-top:8px;"><span class="small-label">Triggers</span>${triggers}</div>`
+                  : ""
+              }
+              ${
+                e.notes
+                  ? `<p style="margin-top:12px; font-style:italic; color:#cbd5e1; font-size:0.85rem;">"${e.notes}"</p>`
+                  : ""
+              }
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    // ---------- STATE BUTTONS ----------
+    function initStateButtons() {
+      const container = document.getElementById("state-buttons");
+      container.innerHTML = states
+        .map(
+          (s) => `
+          <div
+            class="state-btn ${s === currentState ? "active" : ""}"
+            data-state="${s}"
+          >${s}</div>
+        `
+        )
+        .join("");
+
+      container.addEventListener("click", (e) => {
+        const btn = e.target.closest(".state-btn");
+        if (!btn) return;
+        currentState = btn.getAttribute("data-state");
+        document.querySelectorAll(".state-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    }
+
+    // ---------- TRIGGERS ----------
+    function initTriggers() {
+      const input = document.getElementById("trigger-input");
+      const tagsContainer = document.getElementById("trigger-tags");
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const val = input.value.trim();
+          if (!val) return;
+          currentTriggers.push(val);
+          input.value = "";
+          renderTriggerTags();
+        }
+      });
+
+      function renderTriggerTags() {
+        tagsContainer.innerHTML = currentTriggers
+          .map(
+            (t, index) => `
+            <span class="tag" data-index="${index}">
+              ${t} &times;
+            </span>
+          `
+          )
+          .join("");
+
+        tagsContainer.querySelectorAll(".tag").forEach((tagEl) => {
+          tagEl.addEventListener("click", () => {
+            const idx = parseInt(tagEl.getAttribute("data-index"), 10);
+            currentTriggers.splice(idx, 1);
+            renderTriggerTags();
+          });
+        });
+      }
+    }
+
+    // ---------- TABS INIT ----------
+    function initTabs() {
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const id = tab.getAttribute("data-tab");
+          showTab(id);
+        });
+      });
+    }
+
+    // ---------- RANGE SELECT ----------
+    function initRangeSelect() {
+      const select = document.getElementById("range-select");
+      select.addEventListener("change", loadTimeline);
+    }
+
+    // ---------- SAVE BUTTON ----------
+    function initSaveButton() {
+      document.getElementById("save-btn").addEventListener("click", saveCheckIn);
+    }
+
+    // ---------- TUNING PANEL TOGGLE ----------
+    function initTuningPanel() {
+      const toggle = document.getElementById("tuning-toggle");
+      const panel = document.getElementById("tuning-panel");
+      const chevron = document.getElementById("tuning-chevron");
+
+      toggle.addEventListener("click", () => {
+        const isHidden = panel.classList.contains("hidden");
+        panel.classList.toggle("hidden");
+        chevron.style.transform = isHidden ? "rotate(0deg)" : "rotate(-90deg)";
+      });
+    }
+
+    // ---------- TUNING DROPDOWNS ----------
+    function initTuningDropdowns() {
+      ["exploration", "introspection", "stability", "bond", "memory"].forEach((id) => {
+        const el = document.getElementById(id);
+        el.addEventListener("change", updatePreview);
+      });
+    }
+
+    // ---------- PROMPTS ----------
+    function initPrompts() {
+      const categoryButtons = document.querySelectorAll("#prompt-categories .chip");
+      const promptSelect = document.getElementById("prompt-select");
+      const promptText = document.getElementById("prompt-text");
+
+      function loadCategory(categoryKey) {
+        const prompts = promptLibrary[categoryKey] || [];
+        promptSelect.innerHTML = prompts
+          .map((p, idx) => `<option value="${idx}">${p.slice(0, 80)}${p.length > 80 ? "..." : ""}</option>`)
+          .join("");
+        if (prompts.length) {
+          promptText.textContent = prompts[0];
+        } else {
+          promptText.textContent = "";
+        }
+      }
+
+      categoryButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          categoryButtons.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const categoryKey = btn.getAttribute("data-category");
+          loadCategory(categoryKey);
+        });
+      });
+
+      promptSelect.addEventListener("change", () => {
+        const activeCategory = document.querySelector("#prompt-categories .chip.active");
+        if (!activeCategory) return;
+        const key = activeCategory.getAttribute("data-category");
+        const prompts = promptLibrary[key] || [];
+        const idx = parseInt(promptSelect.value, 10);
+        promptText.textContent = prompts[idx] || "";
+      });
+
+      // initial load
+      loadCategory("growth");
+    }
+
+    // ---------- BOOTSTRAP ----------
+    document.getElementById("year").textContent = new Date().getFullYear().toString();
+    loadEntries();
+    initTabs();
+    initStateButtons();
+    initTriggers();
+    initRangeSelect();
+    initSaveButton();
+    initTuningPanel();
+    initTuningDropdowns();
+    initPrompts();
+    updatePreview();
+    loadDashboard();
+  </script>
+</body>
+</html>
