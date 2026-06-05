@@ -104,8 +104,6 @@ No installation required.
 
 Just open index.html in any modern browser.
 
-Or host it via GitHub Pages for instant access.
-
 Disclaimer
 Lumenis is a personal reflection and wellness tracking tool.
 It is not a medical device and does not provide medical, psychological, or therapeutic advice.
